@@ -1,32 +1,220 @@
 <html>
-    <head></head>
+    <head>
+        <link rel="stylesheet" href="static/pico.min.css">
+    </head>
     <body>
-        <div>
-            {% for a in app %}
-            <p>
-                {{a.name}}
-            </p>
-            {% endfor %}
-        </div>
-        <div>
-            {% for a in webhook %}
-            <p>
-                ID{{a.name}}
-            </p>
-            {% endfor %}
-        </div>
-        <div class="rendered-form">
-            <div class="formbuilder-text form-group field-name">
-                <label for="name" class="formbuilder-text-label">Webhook Name</label>
-                <input type="text" class="form-control" name="name" id="name">
+        <div class="container">
+            <h1>Dashboard</h1>
+            <div class="grid">
+                <form method="post">
+                    <input type="hidden" name="type" value="webhook">
+                    <input type="hidden" name="action" value="create">
+                    <h3>Create Webhook</h3>
+                    <div>
+                        <label for="name">
+                            Name
+                            <input type="text" name="name" id="name">
+                        </label>
+                    
+                        <label for="url">
+                            URL
+                            <input type="text" name="url" id="url">
+                        </label>
+                    
+                        <button type="submit">Create</button>
+                    </div>
+                </form>
+                <form method="post">
+                    <input type="hidden" name="type" value="app">
+                    <input type="hidden" name="action" value="create">
+                    <h3>Create Application</h3>
+                    <div>
+                        <label for="name">
+                            Name
+                            <input type="text" name="name" id="name">
+                        </label>
+                    
+                        <label for="webhook_id">Target Webhook</label>
+                        <select id="webhook_id" name="webhook_id">
+                            {% for a in webhook %}
+                            <option value="{{a.id}}">
+                                {{a.id}} - {{a.name}}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    
+                        <button type="submit">Create</button>
+                    </div>
+                </form>
             </div>
-            <div class="formbuilder-text form-group field-url">
-                <label for="url" class="formbuilder-text-label">URL</label>
-                <input type="text" class="form-control" name="url" id="url">
+            <div>
+                <h3>Applications</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Target Webhook</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for a in app %}
+                        <tr>
+                            <td><a onclick="openAppEdit(event)"
+                                data-app-id="{{a.id}}"
+                                data-app-name="{{a.name}}"
+                                data-app-webhook_id="{{a.webhook_id}}"
+                            >Edit</a></td>
+                            <td>{{a.id}}</td>
+                            <td>{{a.name}}</td>
+                            <td>{{a.webhook_id}} - {{a.webhook_name}}</td>
+                            <td>
+                                <form method="post" style="display: inline;">
+                                    <input type="hidden" name="type" value="app">
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="id" value="{{a.id}}">
+                                    <button role="button" type="submit" style="width: unset;">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                
             </div>
-            <div class="">
-                <button type="submit" class="btn-default btn">Create</button>
+            <div>
+                <h3>Webhooks</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>URL</th>
+                            <th>Template</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for a in webhook %}
+                        <tr>
+                            <td><a onclick="openWebhookEdit(event)" 
+                                data-webhook-id="{{a.id}}"
+                                data-webhook-name="{{a.name}}"
+                                data-webhook-url="{{a.url}}"
+                                data-webhook-template="{{a.template}}"
+                            >Edit</a></td>
+                            <td>{{a.id}}</td>
+                            <td>{{a.name}}</td>
+                            <td>{{a.url}}</td>
+                            <td><code>{{a.template}}</code></td>
+                            <td>
+                                <form method="post" style="display: inline;">
+                                    <input type="hidden" name="type" value="webhook">
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="id" value="{{a.id}}">
+                                    <button role="button" type="submit" style="width: unset;">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                
             </div>
         </div>
+        <dialog id="app-edit">
+            <form method="post">
+                <input type="hidden" name="type" value="app">
+                <input type="hidden" name="action" value="update">
+                <article>
+                    <h3>Edit Application</h3>
+                    <p>
+                        <div>
+                            <label for="name">
+                                Name
+                                <input type="text" name="name" id="app-edit-name">
+                            </label>
+
+                            <!-- Set App ID here -->
+                            <input type="hidden" name="id" id="edit-for">
+                        
+                            <label for="app-edit-webhook_id">Target Webhook</label>
+                            <select id="app-edit-webhook_id" name="webhook_id">
+                                {% for a in webhook %}
+                                <option value="{{a.id}}">
+                                    {{a.id}} - {{a.name}}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </p>
+                    <footer>
+                        <a href="#" role="button" class="secondary" onclick="closeAppEdit()">Cancel</a>
+                        <button type="submit" style="display: inline; width:unset;">Save</button>
+                    </footer>
+                </article>
+            </form>
+        </dialog>
+        <dialog id="webhook-edit">
+            <form method="post">
+                <input type="hidden" name="type" value="webhook">
+                <input type="hidden" name="action" value="update">
+                <article>
+                    <h3>Edit Webhook</h3>
+                    <p>
+                        <div>
+                            <label for="name">
+                                Name
+                                <input type="text" name="name" id="webhook-edit-name">
+                            </label>
+
+                            <label for="url">
+                                URL
+                                <input type="text" name="url" id="webhook-edit-url">
+                            </label>
+
+                            <label for="template">
+                                Template
+                                <textarea type="text" name="template" id="webhook-edit-template" style="resize: vertical;"></textarea>
+                            </label>
+
+                            <!-- Set App ID here -->
+                            <input type="hidden" name="id" id="webhook-edit-for">
+                        </div>
+                    </p>
+                    <footer>
+                        <a href="#" role="button" class="secondary" onclick="closeWebhookEdit()">Cancel</a>
+                        <button type="submit" style="display: inline; width:unset;">Save</button>
+                    </footer>
+                </article>
+            </form>
+        </dialog>
+        <script>
+            function s(e){
+                return document.getElementById(e)
+            }
+            function openAppEdit(e){
+                s('app-edit').setAttribute('open', '')
+                s("app-edit-name").value = e.target.getAttribute('data-app-name')
+                s('edit-for').value = e.target.getAttribute('data-app-id')
+                s('app-edit-webhook_id').value = e.target.getAttribute('data-app-webhook_id')
+            }
+            function closeAppEdit(){
+                s('app-edit').removeAttribute('open')
+            }
+            function openWebhookEdit(e){
+                s('webhook-edit').setAttribute('open', '')
+                s("webhook-edit-name").value = e.target.getAttribute('data-webhook-name')
+                s('webhook-edit-for').value = e.target.getAttribute('data-webhook-id')
+                s('webhook-edit-url').value = e.target.getAttribute('data-webhook-url')
+                s('webhook-edit-template').value = e.target.getAttribute('data-webhook-template')
+            }
+            function closeWebhookEdit(){
+                s('webhook-edit').removeAttribute('open')
+            }
+        </script>
     </body>
 </html>
