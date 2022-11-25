@@ -92,6 +92,7 @@ class ApiDatabase:
 def post_webhook(url, template, name, content):
     #BODY_TEMPLATE = '{"username":"$name","content":"$content"}'
     b = template.replace('$name', name.replace('"', '\\"')).replace('$content', content.replace('"', '\\"'))
+    b = b.encode('utf-8')
     r = requests.post(url, b, headers={'content-type': 'application/json'})
     return r.status_code == 200
 
