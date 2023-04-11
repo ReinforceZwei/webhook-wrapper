@@ -2,7 +2,7 @@ from flask import Flask, redirect, render_template, request, jsonify, url_for, s
 import sqlite3
 import requests
 
-DB_FILENAME = 'data.db'
+DB_FILENAME = 'db/data.db'
 DB_SCHEMA = """
 create table if not exists "application" (
     "id" integer NOT NULL PRIMARY KEY AUTOINCREMENT,
